@@ -1,0 +1,147 @@
+{% comment %}
+  Renders a standard dropdown style menu for the header.
+
+  Usage:
+  {% render 'header-dropdown-menu' %}
+{% endcomment %}
+
+<nav class="w-full ">
+  <ul class="list-menu list-menu--inline" role="list">
+    {%- for link in section.settings.menu.links -%}
+      <li>
+        {%- if link.links != blank -%}
+          <header-menu>
+            <details id="Details-HeaderMenu-{{ forloop.index }}">
+              <summary
+                id="HeaderMenu-{{ link.handle }}"
+                class="header__menu-item list-menu__item link focus-inset"
+              >
+                <span
+                  {%- if link.child_active %}
+                    class=" header__active-menu-item"
+                  {% endif %}
+                >
+                  {{- link.title | escape -}}
+                </span>
+                {{- 'icon-caret.svg' | inline_asset_content -}}
+              </summary>
+              <ul
+                id="HeaderMenu-MenuList-{{ forloop.index }}"
+                class="header__submenu list-menu list-menu--disclosure color-{{ section.settings.menu_color_scheme }} gradient caption-large motion-reduce global-settings-popup"
+                role="list"
+                tabindex="-1"
+              >
+                {%- for childlink in link.links -%}
+                  <li>
+                    {%- if childlink.links == blank -%}
+                      <a
+                        id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}"
+                        href="{{ childlink.url }}"
+                        class="header__menu-item list-menu__item link link--text focus-inset caption-large{% if childlink.current %} list-menu__item--active{% endif %}"
+                        {% if childlink.current %}
+                          aria-current="page"
+                        {% endif %}
+                      >
+                        {{ childlink.title | escape }}
+                      </a>
+                    {%- else -%}
+                      <details id="Details-HeaderSubMenu-{{ link.handle }}-{{ childlink.handle }}">
+                        <summary
+                          id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}"
+                          class="header__menu-item link link--text list-menu__item focus-inset caption-large"
+                        >
+                          <span>{{ childlink.title | escape }}</span>
+                          {{- 'icon-caret.svg' | inline_asset_content -}}
+                        </summary>
+                        <ul
+                          id="HeaderMenu-SubMenuList-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}"
+                          class="header__submenu list-menu motion-reduce"
+                        >
+                          {%- for grandchildlink in childlink.links -%}
+                            <li>
+                              <a
+                                id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}"
+                                href="{{ grandchildlink.url }}"
+                                class="header__menu-item list-menu__item link link--text focus-inset caption-large{% if grandchildlink.current %} list-menu__item--active{% endif %}"
+                                {% if grandchildlink.current %}
+                                  aria-current="page"
+                                {% endif %}
+                              >
+                                {{ grandchildlink.title | escape }}
+                              </a>
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      </details>
+                    {%- endif -%}
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </details>
+          </header-menu>
+        {%- else -%}
+          <a
+            id="HeaderMenu-{{ link.handle }}"
+            href="{{ link.url }}"
+            class="header__menu-item list-menu__item link link--text focus-inset"
+            {% if link.current %}
+              aria-current="page"
+            {% endif %}
+          >
+            <span
+              {%- if link.current %}
+                class=" header__active-menu-item text-[16px] font-sans font-normal text-white "
+                {% else %}
+                  class="text-[16px] text-white font-sans font-normal "
+              {% endif %}
+              
+            >
+              {{- link.title | escape -}} 
+            </span>
+               {% if link.title != "Developement" %}
+                 <span id="dots" class="ml-[1.4em]   text-[#CFFF71] text-[1em] font-bold" style="color : green ; text-decoration-thickness: 0rem;">.</span>
+               {% endif %}
+          </a>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>  
+</nav>
+
+
+<div x-cloak x-data="{ search : false }" class="w-full  min-h-[3em] px-[1em] py-[0.1em] text-white flex justify-end items-center gap-[1.4em]">
+
+  <div x-on:click=" search = true " class="w-[6em] h-[2.2em]  border-b-[1.5px]  border-[#CFFF71] bg-black flex justify-between px-[0.35em] items-center hover:border-b-lime-100 duration-200 group ">
+
+    <div class="text-[#CFFF71] group-hover:text-lime-100 duration-200"  >
+      {% render 'header-search' %}
+    </div>
+       <p class="px-[3px] h-[65%] flex justify-center items-center  rounded-md text-black font-semibold bg-[#CFFF71] group-hover:bg-lime-100 duration-200">/</p>
+    
+  </div>  
+{% comment %}  search bar {% endcomment %}
+  <div x-show="search" class="w-screen h-screen bg-[rgba(0,0,0,0.9)] fixed top-0 left-0" >
+     <div class="w-full h-full  flex justify-center pt-[3.6em] relative ">
+      <div @click.away="search = false" class="w-[40%] h-[3.4em] rounded-xl relative bg-white">
+        <input type="search" class="w-full rounded-xl h-full px-[3em] text-slate-500" placeholder="search">
+
+        <div class="absolute top-[30%] left-[0.8em] text-slate-600">
+          {% render 'header-search' %}
+        </div>
+      </div>
+        
+      <div x-on:click="search = false " class="absolute right-[1.7em] top-[0.7em] text-[24px] cursor-pointer">✗</div>
+
+     </div>
+  </div>
+
+  <div class="px-[1em] py-[0.25em] font-normal font-sans rounded-full bg-[#CFFF71] text-black flex items-center justify-center hover:bg-transparent hover:text-[#CFFF71] duration-300 cursor-pointer">
+    <p class="w-full h-full flex items-center justify-between gap-[0.2em]">Audit <span class="ml-[0.2em]"> {% render 'chevron-right' %} </span></p>
+  </div>
+
+
+  {% comment %} search bar  {% endcomment %}
+
+
+</div>
+
